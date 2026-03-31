@@ -261,7 +261,6 @@ Possible future enhancements include:
 ## Author
 
 **Ahmed Yasser Alkasajy**
-Software Engineering Student / Developer
 
 ---
 
