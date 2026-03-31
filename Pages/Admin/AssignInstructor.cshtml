@@ -1,0 +1,52 @@
+﻿@page
+@model student_online_system.Pages.Admin.AssignInstructorModel
+@{
+    ViewData["Title"] = "Assign Instructor";
+}
+
+<div class="container" style="max-width:720px;">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h4>Assign Instructor to Course</h4>
+            <p class="text-muted">Select an instructor and assign them to a course</p>
+
+            @if (!string.IsNullOrWhiteSpace(Model.Message))
+            {
+                <div class="alert alert-info">@Model.Message</div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger">@Model.ErrorMessage</div>
+            }
+
+            <form method="post">
+                <div class="mb-3">
+                    <label class="form-label">Instructor</label>
+                    <select class="form-select form-select-lg" name="InstructorId" required>
+                        @foreach (var i in Model.Instructors)
+                        {
+                            <option class="list-option" value="@i.InstructorId">@i.FullName</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Course</label>
+                    <select class="form-select form-select-lg" name="CourseId" required>
+                        @foreach (var c in Model.Courses)
+                        {
+                            <option class="list-option" value="@c.CourseId">
+                                @c.CourseCode - @c.CourseName
+                            </option>
+                        }
+                    </select>
+                </div>
+
+                <button class="btn btn-danger btn-lg w-100" type="submit">
+                    Assign
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

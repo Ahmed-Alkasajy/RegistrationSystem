@@ -1,0 +1,55 @@
+﻿@page
+@model student_online_system.Pages.Student.EnrollModel
+@{
+    ViewData["Title"] = "Enroll in Course";
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <h3 class="mb-3">Enroll in Course</h3>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Message))
+        {
+            <div class="alert alert-info">@Model.Message</div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        }
+
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Seats</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model.Courses)
+                {
+                    <tr class="hover-option">
+                        <td>@c.CourseCode</td>
+                        <td>@c.CourseName</td>
+                        <td>@c.EnrolledCount / @c.Capacity</td>
+                        <td>
+                            @if (c.SeatsLeft > 0)
+                            {
+                                <form method="post" style="display:inline;">
+                                    <input type="hidden" name="CourseId" value="@c.CourseId" />
+                                    <button class="btn btn-success btn-sm">Enroll</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Full</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

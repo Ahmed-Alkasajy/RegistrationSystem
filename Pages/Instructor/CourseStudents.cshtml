@@ -1,0 +1,42 @@
+﻿@page
+@model student_online_system.Pages.Instructor.CourseStudentsModel
+@{
+    ViewData["Title"] = "Course Students";
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <h3 class="mb-3">Enrolled Students</h3>
+
+        @if (Model.Students.Count == 0)
+        {
+            <p class="text-muted">No students enrolled.</p>
+        }
+        else
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Enroll Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.Students)
+                    {
+                        <tr class="hover-option">
+                            <td>@s.FullName</td>
+                            <td>@s.EMail</td>
+                            <td>@s.EnrollDate.ToShortDateString()</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <a href="/Instructor/MyCourses" class="btn btn-outline-light mt-3">
+            Back
+        </a>
+    </div>
+</div>

@@ -1,0 +1,96 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    var login = Context.Session.GetInt32("Login") ?? 0;
+    var role = Context.Session.GetString("Role") ?? "";
+    var fullName = Context.Session.GetString("FullName") ?? "";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Student Online System</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary">
+        <div class="container">
+            @if (login == 1 && role == "Admin")
+            {
+                <a class="navbar-brand fw-semibold" href="/Admin/Dashboard">Student Online System</a>
+            }
+            else if (login == 1 && role == "Student")
+            {
+                <a class="navbar-brand fw-semibold" href="/Student/Dashboard">Student Online System</a>
+            }
+            else if (login == 1 && role == "Instructor")
+            {
+                <a class="navbar-brand fw-semibold" href="/Instructor/Dashboard">Student Online System</a>
+            }
+            else
+            {
+                <a class="navbar-brand fw-semibold" href="/">Student Online System</a>
+            }
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="nav">
+                <ul class="navbar-nav me-auto">
+                    @if (login == 1 && role == "Admin")
+                    {
+                        <li class="nav-item"><a class="nav-link" href="/Admin/Dashboard">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Admin/CreateUser">Create User</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Admin/Departments">Departments</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Admin/Courses">Courses</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Admin/AssignInstructor">Assign Instructor</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Admin/ResetPassword">Reset Password</a></li>
+                    }
+                    else if (login == 1 && role == "Student")
+                    {
+                        <li class="nav-item"><a class="nav-link" href="/Student/Dashboard">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Student/MyCourses">My Courses</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Student/Enroll">Enroll</a></li>
+                    }
+                    else if (login == 1 && role == "Instructor")
+                    {
+                        <li class="nav-item"><a class="nav-link" href="/Instructor/Dashboard">Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Instructor/MyCourses">My Courses</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/Instructor/CourseMaterials">Courses Materials</a></li>
+                    }
+                </ul>
+
+                <ul class="navbar-nav ms-auto">
+                    @if (login == 1)
+                    {
+                        <li class="nav-item">
+                            <span class="navbar-text text-light me-3">
+                                @fullName (@role)
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-light btn-sm" href="/Logout">Logout</a>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="btn btn-success btn-sm" href="/Login">Login</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-4">
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

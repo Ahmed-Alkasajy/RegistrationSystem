@@ -1,0 +1,44 @@
+﻿@page
+@model student_online_system.Pages.Student.DashboardModel
+@{
+    ViewData["Title"] = "Student Dashboard";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="mb-1">Student Dashboard</h3>
+                <p class="text-muted">
+                    View your courses or enroll in new ones
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mt-3">
+        <a href="/Student/MyCourses" class="text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h5>My Courses</h5>
+                    <p class="text-muted mb-0">
+                        View courses you are enrolled in
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-6 mt-3">
+        <a href="/Student/Enroll" class="text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h5>Enroll in Course</h5>
+                    <p class="text-muted mb-0">
+                        Browse available courses and enroll
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>

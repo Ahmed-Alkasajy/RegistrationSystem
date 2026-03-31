@@ -1,0 +1,64 @@
+﻿@page
+@model student_online_system.Pages.Student.MyCoursesModel
+@{
+    ViewData["Title"] = "My Courses";
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <h3 class="mb-3">My Courses</h3>
+        @if (!string.IsNullOrWhiteSpace(Model.Message))
+        {
+            <div class="alert alert-info">@Model.Message</div>
+        }
+        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        }
+
+
+        @if (Model.Courses.Count == 0)
+        {
+            <p class="text-muted">You are not enrolled in any courses yet.</p>
+        }
+        else
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.Courses)
+                    {
+                        <tr class="hover-option">
+                            <td>@c.CourseCode</td>
+                            <td>@c.CourseName</td>
+                            <td>@c.DepartmentName</td>
+                            <td>
+                                <form method="post" style="display:inline;">
+                                    <input type="hidden" name="CourseId" value="@c.CourseId" />
+                                    <button class="btn btn-danger btn-sm" type="submit">
+                                        Drop
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <a class="btn btn-outline-primary btn-sm"
+                                   href="/Student/ShowMaterials?courseId=@c.CourseId">
+                                    Materials
+                                </a>
+                            </td>
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>

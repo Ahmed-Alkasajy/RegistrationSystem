@@ -1,0 +1,64 @@
+﻿@page
+@model student_online_system.Pages.Admin.DepartmentsModel
+@{
+    ViewData["Title"] = "Departments";
+}
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h5>Add Department</h5>
+
+                @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger">@Model.ErrorMessage</div>
+                }
+
+                <form method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Department Name</label>
+                        <input name="DepartmentName" class="form-control form-control-lg" required />
+                    </div>
+
+                    <button class="btn btn-danger btn-lg w-100" type="submit">
+                        Add
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h5 class="mb-3">Existing Departments</h5>
+
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var d in Model.Departments)
+                        {
+                            <tr class="hover-option">
+                                <td>@d.DepartmentId</td>
+                                <td>@d.DepartmentName</td>
+                                <td>
+                                    <form method="post">
+                                        <input type="hidden" name="DeleteDepartmentId" value="@d.DepartmentId" />
+                                        <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

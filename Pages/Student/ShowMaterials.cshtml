@@ -1,0 +1,47 @@
+﻿@page
+@model student_online_system.Pages.Student.MaterialsModel
+@{
+    ViewData["Title"] = "Course Materials";
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <h3 class="mb-3">Course Materials</h3>
+
+        @if (Model.Materials.Count == 0)
+        {
+            <p class="text-muted">No materials available</p>
+        }
+        else
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Upload Date</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var m in Model.Materials)
+                    {
+                        <tr class="hover-option">
+                            <td>@m.FileName</td>
+                            <td>@m.UploadDate.ToShortDateString()</td>
+                            <td>
+                                <a class="btn btn-outline-primary btn-sm"
+                                   href="@m.FilePath" target="_blank">
+                                    Download
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+
+        <a href="/Student/MyCourses" class="btn btn-outline-light mt-3">
+            Back
+        </a>
+    </div>
+</div>

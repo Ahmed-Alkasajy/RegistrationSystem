@@ -1,0 +1,35 @@
+﻿@page
+@model student_online_system.Pages.LoginModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container" style="max-width:520px; margin-top:70px;">
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <h2 class="mb-1">Student Online System</h2>
+            <p class="text-muted mb-4">Login to continue</p>
+
+            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger">@Model.ErrorMessage</div>
+            }
+
+            <form method="post">
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input class="form-control form-control-lg" type="email" name="EMail"
+                           value="@Model.PrefilledEmail" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input class="form-control form-control-lg" type="password" name="Password" required />
+                </div>
+                
+                <br />
+                <button class="btn btn-success btn-lg w-100" type="submit">Login</button>
+            </form>
+        </div>
+    </div>
+</div>

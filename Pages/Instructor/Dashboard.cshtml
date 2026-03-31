@@ -1,0 +1,41 @@
+﻿@page
+@model student_online_system.Pages.Instructor.DashboardModel
+@{
+    ViewData["Title"] = "Instructor Dashboard";
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <h3 class="mb-1">Instructor Dashboard</h3>
+        <p class="text-muted">View your courses and enrolled students</p>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-6">
+        <a href="/Instructor/MyCourses" class="text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h5>My Courses</h5>
+                    <p class="text-muted mb-0">
+                        View courses you are teaching
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+        <div class="col-md-6">
+        <a href="/Instructor/CourseMaterials" class="text-decoration-none">
+            <div class="card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h5>Courses Materials</h5>
+                    <p class="text-muted mb-0">
+                        Add materials to courses
+                    </p>
+                </div>
+            </div>
+        </a>
+    </div>
+    
+</div>

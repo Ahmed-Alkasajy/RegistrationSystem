@@ -1,0 +1,45 @@
+﻿@page
+@model student_online_system.Pages.Instructor.CourseMaterialsModel
+@{
+    ViewData["Title"] = "Course Materials";
+}
+
+<div class="card shadow-sm">
+    <div class="card-body p-4">
+        <h3 class="mb-3">My Courses (Materials)</h3>
+
+        @if (Model.Courses.Count == 0)
+        {
+            <p class="text-muted">You are not assigned to any courses</p>
+        }
+        else
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.Courses)
+                    {
+                        <tr class="hover-option">
+                            <td>@c.CourseCode</td>
+                            <td>@c.CourseName</td>
+                            <td>@c.DepartmentName</td>
+                            <td>
+                                <a class="btn btn-outline-primary btn-sm"
+                                   href="/Instructor/Materials?courseId=@c.CourseId">
+                                    Materials
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
