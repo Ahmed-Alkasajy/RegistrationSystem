@@ -83,7 +83,7 @@ RegistrationSystem/
 ├── .gitignore
 ├── Program.cs
 ├── README.md
-├── SqlScripts.txt
+├── database.sql
 ├── appsettings.json
 ├── appsettings.Development.json
 └── student online system.csproj
