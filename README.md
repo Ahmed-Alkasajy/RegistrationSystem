@@ -1,4 +1,4 @@
-# Student Online System
+# Online Registration System
 
 A web-based **University Course Registration System** built with **ASP.NET Core Razor Pages** and **SQL Server**.
 The system supports three main roles: **Admin**, **Student**, and **Instructor**, each with dedicated features for managing courses, enrollment, academic organization, and course materials.
