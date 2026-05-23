@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model student_online_system.Pages.Admin.CreateUserModel
 @{
     ViewData["Title"] = "Create User";
@@ -10,44 +10,33 @@
             <h3 class="mb-1">Create User</h3>
             <p class="text-muted">Create student or instructor accounts (Admin only)</p>
 
-            @if (!string.IsNullOrWhiteSpace(Model.Message))
-            {
-                <div class="alert alert-info">@Model.Message</div>
-            }
+            <div id="msgAlert" class="alert alert-info d-none"></div>
+            <div id="errorAlert" class="alert alert-danger d-none"></div>
 
-            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-            {
-                <div class="alert alert-danger">@Model.ErrorMessage</div>
-            }
-
-            <form method="post" class="mt-3">
+            <form id="createForm" class="mt-3">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label">Full Name</label>
-                        <input name="FullName" class="form-control form-control-lg" required />
+                        <input id="fullName" class="form-control form-control-lg" required />
                     </div>
-
                     <div class="col-md-6">
                         <label class="form-label">Role</label>
-                        <select name="Role" class="form-select form-select-lg" required>
-                            <option class="list-option" value="Student">Student</option>
-                            <option class="list-option" value="Instructor">Instructor</option>
-                            <option class="list-option" value="Admin">Admin</option>
+                        <select id="role" class="form-select form-select-lg" required>
+                            <option value="Student">Student</option>
+                            <option value="Instructor">Instructor</option>
+                            <option value="Admin">Admin</option>
                         </select>
                     </div>
-
                     <div class="col-md-6">
                         <label class="form-label">Email</label>
-                        <input name="EMail" type="email" class="form-control form-control-lg" required />
+                        <input id="email" type="email" class="form-control form-control-lg" required />
                     </div>
-
                     <div class="col-md-6">
                         <label class="form-label">Password</label>
-                        <input name="Password" type="password" class="form-control form-control-lg" required />
+                        <input id="password" type="password" class="form-control form-control-lg" required />
                     </div>
-
                     <div class="col-12">
-                        <button class="btn btn-danger btn-lg" type="submit">Create</button>
+                        <button class="btn btn-danger btn-lg" type="submit" id="createBtn">Create</button>
                         <a class="btn btn-outline-light btn-lg ms-2" href="/Admin/Dashboard">Back</a>
                     </div>
                 </div>
@@ -55,3 +44,43 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('createForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const msg = document.getElementById('msgAlert');
+        const err = document.getElementById('errorAlert');
+        const btn = document.getElementById('createBtn');
+        msg.classList.add('d-none');
+        err.classList.add('d-none');
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/admin/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fullName: document.getElementById('fullName').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    role: document.getElementById('role').value
+                })
+            });
+
+            if (res.ok) {
+                msg.textContent = 'User created successfully.';
+                msg.classList.remove('d-none');
+                document.getElementById('createForm').reset();
+            } else {
+                const data = await res.json();
+                err.textContent = data.error || 'Failed to create user.';
+                err.classList.remove('d-none');
+            }
+        } catch {
+            err.textContent = 'An error occurred.';
+            err.classList.remove('d-none');
+        } finally {
+            btn.disabled = false;
+        }
+    });
+</script>

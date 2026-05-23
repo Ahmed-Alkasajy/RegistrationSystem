@@ -2,8 +2,8 @@ DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddRazorPages();
+builder.Services.AddControllers();
 
 builder.Services.AddScoped<student_online_system.Data.Db>();
 
@@ -11,7 +11,6 @@ builder.Services.AddSession();
 builder.Services.AddMemoryCache();
 
 var app = builder.Build();
-
 
 if (!app.Environment.IsDevelopment())
 {
@@ -24,10 +23,11 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseSession();      
+app.UseSession();
 
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapControllers();
 
 app.Run();

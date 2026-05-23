@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model student_online_system.Pages.Instructor.CourseMaterialsModel
 @{
     ViewData["Title"] = "Course Materials";
@@ -8,38 +8,39 @@
     <div class="card-body p-4">
         <h3 class="mb-3">My Courses (Materials)</h3>
 
-        @if (Model.Courses.Count == 0)
-        {
-            <p class="text-muted">You are not assigned to any courses</p>
-        }
-        else
-        {
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Department</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var c in Model.Courses)
-                    {
-                        <tr class="hover-option">
-                            <td>@c.CourseCode</td>
-                            <td>@c.CourseName</td>
-                            <td>@c.DepartmentName</td>
-                            <td>
-                                <a class="btn btn-outline-primary btn-sm"
-                                   href="/Instructor/Materials?courseId=@c.CourseId">
-                                    Materials
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
+        <div id="tableContainer">
+            <p class="text-muted">Loading...</p>
+        </div>
     </div>
 </div>
+
+<script>
+    async function loadCourses() {
+        const res = await fetch('/api/instructor/courses');
+        const data = await res.json();
+        const container = document.getElementById('tableContainer');
+
+        if (data.length === 0) {
+            container.innerHTML = '<p class="text-muted">You are not assigned to any courses.</p>';
+            return;
+        }
+
+        container.innerHTML = `
+            <table class="table table-hover">
+                <thead>
+                    <tr><th>Code</th><th>Name</th><th>Department</th><th></th></tr>
+                </thead>
+                <tbody>
+                    ${data.map(c => `
+                        <tr class="hover-option">
+                            <td>${c.courseCode}</td>
+                            <td>${c.courseName}</td>
+                            <td>${c.departmentName}</td>
+                            <td><a class="btn btn-outline-primary btn-sm" href="/Instructor/Materials?courseId=${c.courseId}">Materials</a></td>
+                        </tr>`).join('')}
+                </tbody>
+            </table>`;
+    }
+
+    loadCourses();
+</script>

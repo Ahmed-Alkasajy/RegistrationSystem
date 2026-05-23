@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model student_online_system.Pages.Admin.CoursesModel
 @{
     ViewData["Title"] = "Courses";
@@ -9,44 +9,29 @@
         <div class="card shadow-sm">
             <div class="card-body p-4">
                 <h5>Create Course</h5>
+                <div id="msgAlert" class="alert alert-info d-none"></div>
+                <div id="errorAlert" class="alert alert-danger d-none"></div>
 
-                @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-                {
-                    <div class="alert alert-danger">@Model.ErrorMessage</div>
-                }
-
-                @if (!string.IsNullOrWhiteSpace(Model.Message))
-                {
-                    <div class="alert alert-info">@Model.Message</div>
-                }
-
-                <form method="post">
+                <form id="createForm">
                     <div class="mb-3">
                         <label class="form-label">Department</label>
-                        <select class="form-select form-select-lg" name="DepartmentId" required>
-                            @foreach (var d in Model.Departments)
-                            {
-                                <option class="list-option" value="@d.DepartmentId">@d.DepartmentName</option>
-                            }
+                        <select id="departmentId" class="form-select form-select-lg" required>
+                            <option value="">Loading...</option>
                         </select>
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label">Course Code</label>
-                        <input class="form-control form-control-lg" name="CourseCode" required />
+                        <input id="courseCode" class="form-control form-control-lg" required />
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label">Course Name</label>
-                        <input class="form-control form-control-lg" name="CourseName" required />
+                        <input id="courseName" class="form-control form-control-lg" required />
                     </div>
-
                     <div class="mb-3">
                         <label class="form-label">Capacity</label>
-                        <input class="form-control form-control-lg" type="number" name="Capacity" min="1" required />
+                        <input id="capacity" class="form-control form-control-lg" type="number" min="1" required />
                     </div>
-
-                    <button class="btn btn-danger btn-lg w-100" type="submit">Create</button>
+                    <button class="btn btn-danger btn-lg w-100" type="submit" id="createBtn">Create</button>
                 </form>
             </div>
         </div>
@@ -56,42 +41,97 @@
         <div class="card shadow-sm">
             <div class="card-body p-4">
                 <h5 class="mb-3">Existing Courses</h5>
-
                 <table class="table table-hover">
                     <thead>
-                        <tr>
-                            <th>Code</th>
-                            <th>Name</th>
-                            <th>Department</th>
-                            <th>Capacity</th>
-                            <th></th>
-                        </tr>
+                        <tr><th>Code</th><th>Name</th><th>Department</th><th>Capacity</th><th></th></tr>
                     </thead>
-                    <tbody>
-                        @foreach (var c in Model.Courses)
-                        {
-                            <tr class="hover-option">
-                                <td>@c.CourseCode</td>
-                                <td>@c.CourseName</td>
-                                <td>@c.DepartmentName</td>
-                                <td>@c.Capacity</td>
-                                <td>
-                                    <form method="post">
-                                        <input type="hidden" name="DeleteCourseId" value="@c.CourseId" />
-                                        <button class="btn btn-danger btn-sm" type="submit">Remove</button>
-                                    </form>
-                                </td>
-
-                            </tr>
-                        }
+                    <tbody id="courseTableBody">
+                        <tr><td colspan="5" class="text-muted">Loading...</td></tr>
                     </tbody>
                 </table>
-
-                @if (Model.Courses.Count == 0)
-                {
-                    <p class="text-muted mb-0">No courses yet</p>
-                }
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    async function loadDepartments() {
+        const res = await fetch('/api/admin/departments');
+        const data = await res.json();
+        const sel = document.getElementById('departmentId');
+        sel.innerHTML = data.map(d => `<option class="list-option" value="${d.departmentId}">${d.departmentName}</option>`).join('');
+    }
+
+    async function loadCourses() {
+        const res = await fetch('/api/admin/courses');
+        const data = await res.json();
+        const tbody = document.getElementById('courseTableBody');
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-muted">No courses yet</td></tr>';
+            return;
+        }
+        tbody.innerHTML = data.map(c => `
+            <tr class="hover-option">
+                <td>${c.courseCode}</td>
+                <td>${c.courseName}</td>
+                <td>${c.departmentName}</td>
+                <td>${c.capacity}</td>
+                <td><button class="btn btn-danger btn-sm" onclick="deleteCourse(${c.courseId})">Remove</button></td>
+            </tr>`).join('');
+    }
+
+    async function deleteCourse(id) {
+        const err = document.getElementById('errorAlert');
+        const msg = document.getElementById('msgAlert');
+        err.classList.add('d-none');
+        const res = await fetch('/api/admin/courses/' + id, { method: 'DELETE' });
+        if (res.ok) {
+            msg.textContent = 'Course deleted successfully.';
+            msg.classList.remove('d-none');
+            loadCourses();
+        } else {
+            const data = await res.json();
+            err.textContent = data.error || 'Failed to delete course.';
+            err.classList.remove('d-none');
+        }
+    }
+
+    document.getElementById('createForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const err = document.getElementById('errorAlert');
+        const msg = document.getElementById('msgAlert');
+        const btn = document.getElementById('createBtn');
+        err.classList.add('d-none');
+        msg.classList.add('d-none');
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/admin/courses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    departmentId: parseInt(document.getElementById('departmentId').value),
+                    courseCode: document.getElementById('courseCode').value,
+                    courseName: document.getElementById('courseName').value,
+                    capacity: parseInt(document.getElementById('capacity').value)
+                })
+            });
+            if (res.ok) {
+                msg.textContent = 'Course created successfully.';
+                msg.classList.remove('d-none');
+                document.getElementById('createForm').reset();
+                await loadDepartments();
+                loadCourses();
+            } else {
+                const data = await res.json();
+                err.textContent = data.error || 'Failed to create course.';
+                err.classList.remove('d-none');
+            }
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    loadDepartments();
+    loadCourses();
+</script>

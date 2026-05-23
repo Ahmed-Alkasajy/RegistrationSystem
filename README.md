@@ -1,260 +1,196 @@
 # Online Registration System
 
-A web-based **University Course Registration System** built with **ASP.NET Core Razor Pages** and **SQL Server**.
-The system supports three main roles: **Admin**, **Student**, and **Instructor**, each with dedicated features for managing courses, enrollment, academic organization, and course materials.
+A web-based **University Course Registration System** built with **ASP.NET Core** and **SQL Server**.
+The system supports three roles: **Admin**, **Student**, and **Instructor**, each with dedicated features for managing courses, enrollment, academic organization, and course materials.
+
+The frontend uses Razor Pages as HTML shells, with all data loaded and submitted through a **REST API** via JavaScript `fetch()`.
 
 ---
 
 ## Overview
 
-This project was developed as a university-style academic management system where:
-
 * **Admins** manage departments, courses, users, and instructor assignments
-* **Students** browse and enroll in courses
-* **Instructors** manage assigned courses and upload course materials
-
-The system is designed with a structured relational database, role-based access logic, and security-focused backend handling.
+* **Students** browse and enroll in courses, and access course materials
+* **Instructors** view assigned courses and upload course materials
 
 ---
 
 ## Features
 
 ### Admin
-
-* Create and manage **departments**
-* Create and manage **courses**
-* Create **students** and **instructors**
-* Search users by **name** or **email**
+* Create and manage departments
+* Create and manage courses
+* Create student and instructor accounts
+* Search users by name or email
 * Assign instructors to courses
 * Reset user passwords
 
 ### Student
-
-* View available courses
+* View available courses with seat counts
 * Enroll in courses
 * Drop enrolled courses
-* View registered courses
+* View and download course materials
 
 ### Instructor
-
-* View assigned courses
-* View enrolled students in each course
-* Upload course materials
-* Access uploaded files
+* View assigned courses and enrolled students
+* Upload and manage course materials
 
 ---
 
-## Technologies Used
+## Technologies
 
-* **ASP.NET Core Razor Pages**
-* **C#**
-* **SQL Server**
-* **ADO.NET**
-* **Stored Procedures**
-* **HTML / CSS / Bootstrap**
+* **ASP.NET Core 8.0** — Razor Pages (HTML shell) + Web API controllers
+* **C#** — backend logic
+* **SQL Server** — relational database
+* **ADO.NET** — direct database access (no ORM)
+* **Stored Procedures** — all core database operations
+* **Bootstrap 5** — frontend styling
+* **JavaScript (fetch API)** — all data requests and form submissions
+* **DotNetEnv** — `.env` file support for local configuration
 
 ---
 
-## Security Features
+## Architecture
 
-This project includes several backend security and data protection practices, including:
+The system is split into two layers:
 
-* **Password hashing**
-* **Stored procedure-based database operations**
-* **SQL Injection countermeasures**
-* **Input validation**
-* Controlled role-based access behavior
+**API layer** (`/api/*`) — ASP.NET Core Web API controllers that handle all data operations and return JSON:
 
-> Database interactions are designed to reduce direct unsafe query execution and improve security handling.
+```
+POST   /api/auth/login
+POST   /api/auth/logout
+GET    /api/admin/departments
+POST   /api/admin/departments
+DELETE /api/admin/departments/{id}
+GET    /api/admin/courses
+GET    /api/admin/courses/simple
+POST   /api/admin/courses
+DELETE /api/admin/courses/{id}
+GET    /api/admin/instructors
+POST   /api/admin/assign-instructor
+POST   /api/admin/users
+GET    /api/admin/users/search?q=
+POST   /api/admin/users/{id}/reset-password
+GET    /api/student/courses
+DELETE /api/student/courses/{courseId}
+GET    /api/student/available-courses
+POST   /api/student/enroll
+GET    /api/student/materials/{courseId}
+GET    /api/instructor/courses
+GET    /api/instructor/courses/{courseId}/students
+GET    /api/instructor/materials/{courseId}
+POST   /api/instructor/materials
+```
+
+**Page layer** (`/Admin/*`, `/Student/*`, `/Instructor/*`) — Razor Pages that serve HTML and use `fetch()` to call the API.
 
 ---
 
 ## Project Structure
 
 ```text
-RegistrationSystem/
-│
+student online system/
+├── Controllers/
+│   ├── AuthController.cs
+│   ├── AdminController.cs
+│   ├── StudentController.cs
+│   └── InstructorController.cs
 ├── Data/
+│   └── Db.cs
 ├── Models/
+│   ├── UserAccount.cs
+│   ├── Student.cs
+│   ├── Instructor.cs
+│   ├── Course.cs
+│   └── Department.cs
 ├── Pages/
-├── Properties/
+│   ├── Login.cshtml
+│   ├── Logout.cshtml
+│   ├── Admin/
+│   ├── Student/
+│   └── Instructor/
 ├── wwwroot/
-├── .gitattributes
+│   ├── css/
+│   ├── js/
+│   ├── lib/
+│   └── uploads/
+├── .env                  (not committed — copy from .env.example)
+├── .env.example
 ├── .gitignore
 ├── Program.cs
-├── README.md
-├── database.sql
 ├── appsettings.json
-├── appsettings.Development.json
+├── database.sql
 └── student online system.csproj
 ```
 
 ---
 
-## Database Design
+## Database
 
-The system database includes the following main entities:
+**Database name:** `regsystem`
 
-* **UserAccount**
-* **Department**
-* **Student**
-* **Instructor**
-* **Course**
-* **CourseInstructor**
-* **Enrollment**
-* **CourseMaterial**
+**Tables:** `UserAccount`, `Department`, `Student`, `Instructor`, `Course`, `CourseInstructor`, `Enrollment`, `CourseMaterial`
 
-### Database Logic Includes
+**Stored procedures:** `CreateUser`, `GetUserForLogin`, `GetDepartments`, `CreateDepartment`, `DeleteDepartment`, `GetCourses`, `CreateCourse`, `DeleteCourse`, `AssignInstructorToCourse`, `GetInstructorCourses`, `GetCourseStudents`, `EnrollStudent`, `GetStudentCourses`, `DropStudentCourse`, `GetCourseMaterials`, `AddCourseMaterial`, `SearchUsers`, `AdminResetPassword`
 
-* Primary keys and foreign keys
-* Unique constraints
-* Capacity validation for courses
-* Role-based user creation
-* Instructor assignment restrictions
-* Stored procedures for core system operations
-
----
-
-## How to Run the Project
-
-### 1) Clone the repository
-
-```bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY_NAME.git
-cd "YOUR_REPOSITORY_NAME"
-```
-
----
-
-### 2) Open the project
-
-Open the project in:
-
-* **Visual Studio 2022** (recommended)
-
-Then open:
-
-```text
-student online system.csproj
-```
-
-or the solution file if available.
-
----
-
-### 3) Create the database
-
-Create a SQL Server database named:
-
-```sql
-regsystem
-```
-
----
-
-### 4) Run the database script
-
-Open the SQL file:
-
-```text
-SqlScripts.txt
-```
-
-Then execute its contents in SQL Server Management Studio (SSMS) or your preferred SQL client.
-
-This script will:
-
-* Create all required tables
-* Create stored procedures
-* Apply constraints
-* Insert sample departments and courses
-* Insert a demo admin account
-
----
-
-### 5) Configure the connection string
-
-Open:
-
-```json
-appsettings.json
-```
-
-Update the connection string to match your SQL Server setup.
-
-Example:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=.;Database=regsystem;Trusted_Connection=True;TrustServerCertificate=True;"
-  }
-}
-```
-
-> Replace the server name if your SQL Server instance is different.
-
----
-
-### 6) Run the project
-
-Press:
-
-```text
-Ctrl + F5
-```
-
-or click **Run** in Visual Studio.
-
----
-
-## Demo Admin Account
-
-After running the SQL script, a demo admin account is created.
-
-### Demo Login
-
-* **Email:** `admin@example.com`
-* **Password:** `admin123`
-
-> You can modify this in the SQL script if needed.
-
----
-
-## Business Rules Implemented
-
-* A student **cannot enroll twice** in the same course
-* A course **cannot exceed its capacity**
-* A course can only have **one assigned instructor**
-* A department **cannot be deleted** if it has assigned courses
-* A course **cannot be deleted** if students are enrolled in it
+### Business Rules
+* A student cannot enroll twice in the same course
+* A course cannot exceed its capacity
+* A course can only have one assigned instructor
+* A department cannot be deleted if it has courses
+* A course cannot be deleted if students are enrolled in it
 * Duplicate emails, department names, and course codes are prevented
 
 ---
 
-## Notes
+## How to Run
 
-* Uploaded files are stored and managed through the system
-* The project follows a structured separation between:
+### 1. Clone the repository
 
-  * **Data access**
-  * **Models**
-  * **Razor Pages**
-  * **Static assets**
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
+cd "student online system"
+```
+
+### 2. Create the database
+
+Create a SQL Server database named `regsystem`, then run `database.sql` in SSMS to create all tables, stored procedures, and seed data.
+
+### 3. Configure the connection string
+
+Copy `.env.example` to `.env` and set your SQL Server instance name:
+
+```env
+ConnectionStrings__ConnectionString=Data Source=YOUR_SERVER;Database=regsystem;Trusted_Connection=True;TrustServerCertificate=True;Encrypt=False
+```
+
+The connection string in `appsettings.json` is intentionally blank — `.env` overrides it at runtime.
+
+### 4. Run the project
+
+```bash
+dotnet run
+```
+
+Or open `student online system.sln` in Visual Studio and press `Ctrl+F5`.
+
+The app starts at `http://localhost:5010`.
+
+### 5. Log in
+
+A demo admin account is seeded by the SQL script:
+
+* **Email:** `ahmed@gmail.com`
+* **Password:** `123123`
 
 ---
 
-## Future Improvements
+## Security
 
-Possible future enhancements include:
-
-* Authentication and authorization improvements
-* Better dashboard design
-* Search and filtering for courses
-* Student grades / transcript features
-* Notifications and announcements
-* File upload validation improvements
-* Pagination and reporting features
+* Passwords are hashed with `PasswordHasher<string>` (ASP.NET Core Identity)
+* All database access uses parameterized stored procedures — no raw SQL with user input
+* Role-based session checks on every API endpoint and page
+* Connection string kept out of source control via `.env`
 
 ---
 
@@ -266,4 +202,4 @@ Possible future enhancements include:
 
 ## License
 
-This project is for **educational, learning, and portfolio purposes**.
+This project is for educational, learning, and portfolio purposes.

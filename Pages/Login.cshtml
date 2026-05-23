@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model student_online_system.Pages.LoginModel
 @{
     ViewData["Title"] = "Login";
@@ -10,26 +10,60 @@
             <h2 class="mb-1">Student Online System</h2>
             <p class="text-muted mb-4">Login to continue</p>
 
-            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-            {
-                <div class="alert alert-danger">@Model.ErrorMessage</div>
-            }
+            <div id="errorAlert" class="alert alert-danger d-none"></div>
 
-            <form method="post">
+            <form id="loginForm">
                 <div class="mb-3">
                     <label class="form-label">Email</label>
-                    <input class="form-control form-control-lg" type="email" name="EMail"
-                           value="@Model.PrefilledEmail" required />
+                    <input id="email" class="form-control form-control-lg" type="email" required />
                 </div>
-
                 <div class="mb-3">
                     <label class="form-label">Password</label>
-                    <input class="form-control form-control-lg" type="password" name="Password" required />
+                    <input id="password" class="form-control form-control-lg" type="password" required />
                 </div>
-                
                 <br />
-                <button class="btn btn-success btn-lg w-100" type="submit">Login</button>
+                <button class="btn btn-success btn-lg w-100" type="submit" id="loginBtn">Login</button>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const btn = document.getElementById('loginBtn');
+        const errorAlert = document.getElementById('errorAlert');
+        errorAlert.classList.add('d-none');
+        btn.disabled = true;
+        btn.textContent = 'Logging in...';
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                errorAlert.textContent = data.error || 'Login failed';
+                errorAlert.classList.remove('d-none');
+                return;
+            }
+
+            if (data.role === 'Admin') window.location.href = '/Admin/Dashboard';
+            else if (data.role === 'Instructor') window.location.href = '/Instructor/Dashboard';
+            else window.location.href = '/Student/Dashboard';
+        } catch {
+            errorAlert.textContent = 'An error occurred. Please try again.';
+            errorAlert.classList.remove('d-none');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Login';
+        }
+    });
+</script>

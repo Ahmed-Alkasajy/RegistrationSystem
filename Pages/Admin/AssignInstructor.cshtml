@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model student_online_system.Pages.Admin.AssignInstructorModel
 @{
     ViewData["Title"] = "Assign Instructor";
@@ -10,43 +10,73 @@
             <h4>Assign Instructor to Course</h4>
             <p class="text-muted">Select an instructor and assign them to a course</p>
 
-            @if (!string.IsNullOrWhiteSpace(Model.Message))
-            {
-                <div class="alert alert-info">@Model.Message</div>
-            }
+            <div id="msgAlert" class="alert alert-info d-none"></div>
+            <div id="errorAlert" class="alert alert-danger d-none"></div>
 
-            @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-            {
-                <div class="alert alert-danger">@Model.ErrorMessage</div>
-            }
-
-            <form method="post">
+            <form id="assignForm">
                 <div class="mb-3">
                     <label class="form-label">Instructor</label>
-                    <select class="form-select form-select-lg" name="InstructorId" required>
-                        @foreach (var i in Model.Instructors)
-                        {
-                            <option class="list-option" value="@i.InstructorId">@i.FullName</option>
-                        }
+                    <select id="instructorId" class="form-select form-select-lg" required>
+                        <option value="">Loading...</option>
                     </select>
                 </div>
-
                 <div class="mb-3">
                     <label class="form-label">Course</label>
-                    <select class="form-select form-select-lg" name="CourseId" required>
-                        @foreach (var c in Model.Courses)
-                        {
-                            <option class="list-option" value="@c.CourseId">
-                                @c.CourseCode - @c.CourseName
-                            </option>
-                        }
+                    <select id="courseId" class="form-select form-select-lg" required>
+                        <option value="">Loading...</option>
                     </select>
                 </div>
-
-                <button class="btn btn-danger btn-lg w-100" type="submit">
-                    Assign
-                </button>
+                <button class="btn btn-danger btn-lg w-100" type="submit" id="assignBtn">Assign</button>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+    async function loadData() {
+        const [instrRes, courseRes] = await Promise.all([
+            fetch('/api/admin/instructors'),
+            fetch('/api/admin/courses/simple')
+        ]);
+        const instructors = await instrRes.json();
+        const courses = await courseRes.json();
+
+        document.getElementById('instructorId').innerHTML =
+            instructors.map(i => `<option class="list-option" value="${i.instructorId}">${i.fullName}</option>`).join('');
+        document.getElementById('courseId').innerHTML =
+            courses.map(c => `<option class="list-option" value="${c.courseId}">${c.courseCode} - ${c.courseName}</option>`).join('');
+    }
+
+    document.getElementById('assignForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const msg = document.getElementById('msgAlert');
+        const err = document.getElementById('errorAlert');
+        const btn = document.getElementById('assignBtn');
+        msg.classList.add('d-none');
+        err.classList.add('d-none');
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/admin/assign-instructor', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    instructorId: parseInt(document.getElementById('instructorId').value),
+                    courseId: parseInt(document.getElementById('courseId').value)
+                })
+            });
+            if (res.ok) {
+                msg.textContent = 'Instructor assigned successfully.';
+                msg.classList.remove('d-none');
+            } else {
+                const data = await res.json();
+                err.textContent = data.error || 'Failed to assign instructor.';
+                err.classList.remove('d-none');
+            }
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    loadData();
+</script>

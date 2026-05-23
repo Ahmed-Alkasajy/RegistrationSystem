@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model student_online_system.Pages.Student.EnrollModel
 @{
     ViewData["Title"] = "Enroll in Course";
@@ -7,49 +7,62 @@
 <div class="card shadow-sm">
     <div class="card-body p-4">
         <h3 class="mb-3">Enroll in Course</h3>
+        <div id="msgAlert" class="alert alert-info d-none"></div>
+        <div id="errorAlert" class="alert alert-danger d-none"></div>
 
-        @if (!string.IsNullOrWhiteSpace(Model.Message))
-        {
-            <div class="alert alert-info">@Model.Message</div>
-        }
-
-        @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-        {
-            <div class="alert alert-danger">@Model.ErrorMessage</div>
-        }
-
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Code</th>
-                    <th>Name</th>
-                    <th>Seats</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var c in Model.Courses)
-                {
-                    <tr class="hover-option">
-                        <td>@c.CourseCode</td>
-                        <td>@c.CourseName</td>
-                        <td>@c.EnrolledCount / @c.Capacity</td>
-                        <td>
-                            @if (c.SeatsLeft > 0)
-                            {
-                                <form method="post" style="display:inline;">
-                                    <input type="hidden" name="CourseId" value="@c.CourseId" />
-                                    <button class="btn btn-success btn-sm">Enroll</button>
-                                </form>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary">Full</span>
-                            }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div id="tableContainer">
+            <p class="text-muted">Loading...</p>
+        </div>
     </div>
 </div>
+
+<script>
+    async function loadCourses() {
+        const res = await fetch('/api/student/available-courses');
+        const data = await res.json();
+        const container = document.getElementById('tableContainer');
+
+        container.innerHTML = `
+            <table class="table table-hover">
+                <thead>
+                    <tr><th>Code</th><th>Name</th><th>Seats</th><th></th></tr>
+                </thead>
+                <tbody>
+                    ${data.map(c => `
+                        <tr class="hover-option">
+                            <td>${c.courseCode}</td>
+                            <td>${c.courseName}</td>
+                            <td>${c.enrolledCount} / ${c.capacity}</td>
+                            <td>${c.seatsLeft > 0
+                                ? `<button class="btn btn-success btn-sm" onclick="enroll(${c.courseId})">Enroll</button>`
+                                : '<span class="badge bg-secondary">Full</span>'
+                            }</td>
+                        </tr>`).join('')}
+                </tbody>
+            </table>`;
+    }
+
+    async function enroll(courseId) {
+        const msg = document.getElementById('msgAlert');
+        const err = document.getElementById('errorAlert');
+        msg.classList.add('d-none');
+        err.classList.add('d-none');
+
+        const res = await fetch('/api/student/enroll', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ courseId })
+        });
+        if (res.ok) {
+            msg.textContent = 'Enrolled successfully.';
+            msg.classList.remove('d-none');
+            loadCourses();
+        } else {
+            const data = await res.json();
+            err.textContent = data.error || 'Failed to enroll.';
+            err.classList.remove('d-none');
+        }
+    }
+
+    loadCourses();
+</script>

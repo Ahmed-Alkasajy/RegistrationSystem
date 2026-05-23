@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model student_online_system.Pages.Admin.DepartmentsModel
 @{
     ViewData["Title"] = "Departments";
@@ -9,21 +9,14 @@
         <div class="card shadow-sm">
             <div class="card-body p-4">
                 <h5>Add Department</h5>
+                <div id="errorAlert" class="alert alert-danger d-none"></div>
 
-                @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
-                {
-                    <div class="alert alert-danger">@Model.ErrorMessage</div>
-                }
-
-                <form method="post">
+                <form id="addForm">
                     <div class="mb-3">
                         <label class="form-label">Department Name</label>
-                        <input name="DepartmentName" class="form-control form-control-lg" required />
+                        <input id="deptName" class="form-control form-control-lg" required />
                     </div>
-
-                    <button class="btn btn-danger btn-lg w-100" type="submit">
-                        Add
-                    </button>
+                    <button class="btn btn-danger btn-lg w-100" type="submit" id="addBtn">Add</button>
                 </form>
             </div>
         </div>
@@ -33,32 +26,76 @@
         <div class="card shadow-sm">
             <div class="card-body p-4">
                 <h5 class="mb-3">Existing Departments</h5>
-
                 <table class="table table-hover">
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Name</th>
-                            <th></th>
-                        </tr>
+                        <tr><th>ID</th><th>Name</th><th></th></tr>
                     </thead>
-                    <tbody>
-                        @foreach (var d in Model.Departments)
-                        {
-                            <tr class="hover-option">
-                                <td>@d.DepartmentId</td>
-                                <td>@d.DepartmentName</td>
-                                <td>
-                                    <form method="post">
-                                        <input type="hidden" name="DeleteDepartmentId" value="@d.DepartmentId" />
-                                        <button class="btn btn-danger btn-sm" type="submit">Remove</button>
-                                    </form>
-                                </td>
-                            </tr>
-                        }
+                    <tbody id="deptTableBody">
+                        <tr><td colspan="3" class="text-muted">Loading...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    async function loadDepartments() {
+        const res = await fetch('/api/admin/departments');
+        const data = await res.json();
+        const tbody = document.getElementById('deptTableBody');
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-muted">No departments yet</td></tr>';
+            return;
+        }
+        tbody.innerHTML = data.map(d => `
+            <tr class="hover-option">
+                <td>${d.departmentId}</td>
+                <td>${d.departmentName}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="deleteDept(${d.departmentId})">Remove</button>
+                </td>
+            </tr>`).join('');
+    }
+
+    async function deleteDept(id) {
+        const err = document.getElementById('errorAlert');
+        err.classList.add('d-none');
+        const res = await fetch('/api/admin/departments/' + id, { method: 'DELETE' });
+        if (res.ok) {
+            loadDepartments();
+        } else {
+            const data = await res.json();
+            err.textContent = data.error || 'Failed to delete department.';
+            err.classList.remove('d-none');
+        }
+    }
+
+    document.getElementById('addForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const err = document.getElementById('errorAlert');
+        const btn = document.getElementById('addBtn');
+        err.classList.add('d-none');
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/admin/departments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ departmentName: document.getElementById('deptName').value })
+            });
+            if (res.ok) {
+                document.getElementById('deptName').value = '';
+                loadDepartments();
+            } else {
+                const data = await res.json();
+                err.textContent = data.error || 'Failed to add department.';
+                err.classList.remove('d-none');
+            }
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    loadDepartments();
+</script>

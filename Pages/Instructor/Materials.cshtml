@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model student_online_system.Pages.Instructor.MaterialsModel
 @{
     ViewData["Title"] = "Course Materials";
@@ -8,62 +8,102 @@
     <div class="card-body p-4">
         <h3 class="mb-3">Course Materials</h3>
 
-        @if (Model.Materials.Count == 0)
-        {
-            <p class="text-muted">No materials uploaded</p>
-        }
-        else
-        {
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>File Name</th>
-                        <th>Upload Date</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var m in Model.Materials)
-                    {
-                        <tr class="hover-option">
-                            <td>@m.FileName</td>
-                            <td>@m.UploadDate.ToShortDateString()</td>
-                            <td>
-                                <a class="btn btn-outline-primary btn-sm"
-                                   href="@m.FilePath" target="_blank">
-                                    Download
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
+        <div id="tableContainer">
+            <p class="text-muted">Loading...</p>
+        </div>
 
         <hr />
 
         <h5 class="mt-3">Add Material</h5>
+        <div id="uploadErr" class="alert alert-danger d-none"></div>
+        <div id="uploadMsg" class="alert alert-info d-none"></div>
 
-        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-        {
-            <div class="alert alert-danger">@Model.ErrorMessage</div>
-        }
-
-        <form method="post" enctype="multipart/form-data">
-            <input type="hidden" name="CourseId" value="@Model.CourseId" />
-
+        <form id="uploadForm">
             <div class="mb-3">
-                <input type="file" name="File" class="form-control" required />
+                <input type="file" id="fileInput" class="form-control" required />
             </div>
-
-            <button class="btn btn-primary btn-sm" type="submit">
-                Upload
-            </button>
+            <button class="btn btn-primary btn-sm" type="submit" id="uploadBtn">Upload</button>
         </form>
 
-
-        <a href="/Instructor/CourseMaterials" class="btn btn-outline-light mt-3">
-            Back
-        </a>
+        <a href="/Instructor/CourseMaterials" class="btn btn-outline-light mt-3">Back</a>
     </div>
 </div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const courseId = params.get('courseId');
+
+    async function loadMaterials() {
+        const container = document.getElementById('tableContainer');
+        if (!courseId) {
+            container.innerHTML = '<p class="text-muted">No course selected.</p>';
+            return;
+        }
+
+        const res = await fetch('/api/instructor/materials/' + courseId);
+        const data = await res.json();
+
+        if (data.length === 0) {
+            container.innerHTML = '<p class="text-muted">No materials uploaded.</p>';
+            return;
+        }
+
+        container.innerHTML = `
+            <table class="table table-hover">
+                <thead>
+                    <tr><th>File Name</th><th>Upload Date</th><th></th></tr>
+                </thead>
+                <tbody>
+                    ${data.map(m => `
+                        <tr class="hover-option">
+                            <td>${m.fileName}</td>
+                            <td>${m.uploadDate}</td>
+                            <td><a class="btn btn-outline-primary btn-sm" href="${m.filePath}" target="_blank">Download</a></td>
+                        </tr>`).join('')}
+                </tbody>
+            </table>`;
+    }
+
+    document.getElementById('uploadForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const err = document.getElementById('uploadErr');
+        const msg = document.getElementById('uploadMsg');
+        const btn = document.getElementById('uploadBtn');
+        err.classList.add('d-none');
+        msg.classList.add('d-none');
+        btn.disabled = true;
+
+        const file = document.getElementById('fileInput').files[0];
+        if (!file) {
+            err.textContent = 'Please select a file.';
+            err.classList.remove('d-none');
+            btn.disabled = false;
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('courseId', courseId);
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('/api/instructor/materials', {
+                method: 'POST',
+                body: formData
+            });
+            if (res.ok) {
+                msg.textContent = 'File uploaded successfully.';
+                msg.classList.remove('d-none');
+                document.getElementById('uploadForm').reset();
+                loadMaterials();
+            } else {
+                const data = await res.json();
+                err.textContent = data.error || 'Upload failed.';
+                err.classList.remove('d-none');
+            }
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    loadMaterials();
+</script>
