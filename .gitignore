@@ -399,3 +399,21 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Claude Code
+.claude/
+
+# Environment variables (use .env.example as template)
+.env
+
+# User secrets
+secrets.json
+appsettings.Local.json
+
+# Uploaded files (runtime-generated)
+wwwroot/uploads/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
